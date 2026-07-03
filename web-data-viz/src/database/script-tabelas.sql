@@ -1,58 +1,43 @@
--- Arquivo de apoio, caso você queira criar tabelas como as aqui criadas para a API funcionar.
--- Você precisa executar os comandos no banco de dados para criar as tabelas,
--- ter este arquivo aqui não significa que a tabela em seu BD estará como abaixo!
-
-/*
-comandos para mysql server
-*/
-
-CREATE DATABASE aquatech;
-
-USE aquatech;
-
-CREATE TABLE empresa (
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	razao_social VARCHAR(50),
-	cnpj CHAR(14),
-	codigo_ativacao VARCHAR(50)
-);
+CREATE DATABASE projeto_individual;
+USE projeto_individual;
 
 CREATE TABLE usuario (
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	nome VARCHAR(50),
-	email VARCHAR(50),
-	senha VARCHAR(50),
-	fk_empresa INT,
-	FOREIGN KEY (fk_empresa) REFERENCES empresa(id)
+    id_usuario INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(50) NOT NULL,
+    email VARCHAR(50) UNIQUE NOT NULL,
+    senha VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE aviso (
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	titulo VARCHAR(100),
-	descricao VARCHAR(150),
-	fk_usuario INT,
-	FOREIGN KEY (fk_usuario) REFERENCES usuario(id)
+CREATE TABLE tentativa (
+    id_tentativa INT PRIMARY KEY AUTO_INCREMENT,
+    descricao VARCHAR(255) NOT NULL, 
+    resultado VARCHAR(30) NOT NULL CHECK (resultado IN('Acertou', 'Errou')), 
+    data_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fk_usuario INT,
+		CONSTRAINT fk_usuario_tentativa FOREIGN KEY (fk_usuario)
+			REFERENCES usuario(id_usuario)
 );
 
-create table aquario (
-/* em nossa regra de negócio, um aquario tem apenas um sensor */
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	descricao VARCHAR(300),
-	fk_empresa INT,
-	FOREIGN KEY (fk_empresa) REFERENCES empresa(id)
+CREATE TABLE jogadores (
+    id_jogador INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    posicao VARCHAR(50) NOT NULL,
+    time_atual VARCHAR(50) NOT NULL,
+    altura DECIMAL(3,2) NOT NULL, 
+    game_winners_convertidos INT NOT NULL, 
+    game_winners_perdidos INT NOT NULL
 );
 
-/* esta tabela deve estar de acordo com o que está em INSERT de sua API do arduino - dat-acqu-ino */
-
-create table medida (
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	temperatura DECIMAL,
-	momento DATETIME,
-	fk_aquario INT,
-	FOREIGN KEY (fk_aquario) REFERENCES aquario(id)
+CREATE TABLE conquistas (
+    id_conquista INT PRIMARY KEY AUTO_INCREMENT,
+    titulo VARCHAR(100) NOT NULL UNIQUE,
+    descricao VARCHAR(255) NOT NULL UNIQUE,
+    requisito_acertos INT
 );
 
-insert into empresa (razao_social, codigo_ativacao) values ('Empresa 1', 'ED145B');
-insert into empresa (razao_social, codigo_ativacao) values ('Empresa 2', 'A1B2C3');
-insert into aquario (descricao, fk_empresa) values ('Aquário de Estrela-do-mar', 1);
-insert into aquario (descricao, fk_empresa) values ('Aquário de Peixe-dourado', 2);
+CREATE TABLE usuario_conquistas (
+    fk_usuario INT,
+    fk_conquista INT,
+    data_conclusao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (fk_usuario, fk_conquista) 
+);
