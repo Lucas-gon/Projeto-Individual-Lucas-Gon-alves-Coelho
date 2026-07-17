@@ -28,7 +28,7 @@ function cadastrar(req, res) {
 };
 
 function alimentar_dashboard(req, res) {
-    var id_usuario = req.body.id_usuario;
+    var id_usuario = req.params.id_usuario;
 
     tentativaModel.alimentar_dashboard(id_usuario)
         .then(function (resultado) {
