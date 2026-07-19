@@ -72,7 +72,7 @@
           <img src="./assets/circle-loading.gif" id="loading-gif" />
         </div>
 
-        <div id="div_erros_login"></div>
+        <div id="mensagem_erro2"></div>
       </div>
     </div>
   </div>
@@ -91,17 +91,64 @@
     var senhaVar = senha_input.value;
     var confirmacaoSenhaVar = confirmacao_senha_input.value;
 
-    // Verificando se há algum campo em branco
-    if (
-      nomeVar == "" ||
-      emailVar == "" ||
-      senhaVar == "" ||
-      confirmacaoSenhaVar == ""
-    ) {
-      cardErro.style.display = "block";
-      mensagem_erro.innerHTML = "⚠️ Preencha todos os campos para prosseguir!";
-      return false;
+    if (nomeVar.trim() == "" || emailVar.trim() == "" || senhaVar.trim() == "" || confirmacaoSenhaVar.trim() == "") {
+        mensagem_erro2.innerHTML = "⚠️ Por favor, preencha todos os campos!";
+        return false;
     }
+
+    let arroba = emailVar.indexOf('@'); 
+    let ponto_com = emailVar.lastIndexOf('.com');
+
+    if (arroba == -1 || ponto_com == -1 || ponto_com < arroba) {
+        mensagem_erro2.innerHTML = "⚠️ E-mail inválido! Certifique-se de usar '@' e '.com' na ordem correta.";
+        return false;
+    }
+
+    if (senhaVar.length < 8) {
+    mensagem_erro2.innerHTML = "⚠️ A senha deve ter no mínimo 8 caracteres!";
+    return false;
+}
+
+let tem_maiuscula = false;
+let tem_numero = false;
+let tem_especial = false;
+
+let caracteresEspeciais = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
+
+for (let i = 0; i < senhaVar.length; i++) {
+    let letra_atual = senhaVar[i];
+
+    if (letra_atual >= '0' && letra_atual <= '9') {
+        tem_numero = true;
+    } 
+    else if (letra_atual >= 'A' && letra_atual <= 'Z') {
+        tem_maiuscula = true;
+    } 
+    else if (caracteresEspeciais.indexOf(letra_atual) != -1) {
+        tem_especial = true;
+    }
+}
+
+if (tem_maiuscula == false) {
+    mensagem_erro2.innerHTML = "⚠️ A senha deve conter pelo menos uma letra maiúscula!";
+    return false;
+}
+
+if (tem_numero == false) {
+    mensagem_erro2.innerHTML = "⚠️ A senha deve conter pelo menos um número!";
+    return false;
+}
+
+if (tem_especial == false) {
+    mensagem_erro2.innerHTML = "⚠️ A senha deve conter pelo menos um caractere especial! (Ex: @, #, $)";
+    return false;
+  } 
+  if(senhaVar !== confirmacaoSenhaVar) {
+    mensagem_erro2.innerHTML = "⚠️ As senhas não coincidem!";
+    return false;
+
+  } else {
+
     // Enviando o valor da nova input
     fetch("/usuarios/cadastrar", {
       method: "POST",
@@ -114,27 +161,27 @@
         senhaServer: senhaVar
       }),
     })
-      .then(function (resposta) {
-        console.log("resposta: ", resposta);
+    .then(function (resposta) {
+      console.log("resposta: ", resposta);
 
-        if (resposta.ok) {
-          cardErro.style.display = "block";
-
-          mensagem_erro.innerHTML =
-            "✅Cadastro realizado com sucesso!<br>Redirecionando para tela de Login...";
-
-          setTimeout(() => {
-            window.location = "login.html";
-          }, "2000");
-
-        } else {
-          throw "Houve um erro ao tentar realizar o cadastro!";
-        }
-      })
+      if (resposta.ok) {
+        cardErro.style.display = "block";
+        mensagem_erro.innerHTML =
+        "✅Cadastro realizado com sucesso!<br>Redirecionando para tela de Login...";
+        
+        setTimeout(() => {
+          window.location = "login.html";
+        }, "2000");
+        
+      } else {
+        throw "Houve um erro ao tentar realizar o cadastro!";
+      }
+    })
       .catch(function (resposta) {
         console.log(`#ERRO: ${resposta}`);
       });
-
-    return false;
+      
+      return false;
+    }
   }
-</script>
+  </script>
