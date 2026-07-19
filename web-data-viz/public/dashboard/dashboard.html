@@ -28,7 +28,7 @@
 
     <div class="janela">
         <div class="header-left">
-            <h1>Game Winner</h1>
+            <h1 class="titulo">Game Winner</h1>
 
             <div class="hello">
                 <h3>Olá, <span id="b_usuario">usuário</span>!</h3>
@@ -37,6 +37,12 @@
             <div class="btn-nav-white">
                 <a href="./tentativas.html">
                     <h3>Registrar Tentativas</h3>
+                </a>
+            </div>
+
+            <div class="btn-nav-white">
+                <a href="./gigantes.html">
+                    <h3>Gigantes</h3>
                 </a>
             </div>
 
@@ -56,13 +62,22 @@
 
     <div class="kpis">
 
-        <div id="kpi_porcentagem" class="kpi">0</div>
-
-        <div id="kpi_totais" class="kpi">0</div>
-
-        <div id="kpi_total_acertos" class="kpi">0</div>
-
+    <div class="kpi">
+        <span class="titulo-kpi">FIELD GOAL PERCENTAGE</span>
+        <h2 id="kpi_porcentagem" style="color: #FF8C00">0%</h2>
     </div>
+
+    <div class="kpi">
+        <span class="titulo-kpi">ARREMESSOS TOTAIS</span>
+        <h2 id="kpi_totais">0</h2>
+    </div>
+
+    <div class="kpi">
+        <span class="titulo-kpi">TOTAL DE ACERTOS</span>
+        <h2 id="kpi_total_acertos" style="color: rgb(18, 198, 18);">0 🔥</h2>
+    </div>
+
+</div>
 
     <div class="graficos">
         <div class="grafico-linha">
@@ -105,7 +120,6 @@ function obter_dados_dashboard() {
                 response.json()
                 .then(function (resposta) {
                     console.log(`Dados recebidos da VIEW: ${JSON.stringify(resposta)}`);
-                    // resposta.reverse();
                     plotar_grafico_donut(resposta, id_usuario);
                     preencher_kpis(resposta);
                 });
@@ -131,7 +145,7 @@ function obter_dados_grafico_evolucao() {
                 response.json()
                 .then(function (resposta) {
                     console.log(`Quantidade de dados recebidos: ${resposta.length}`);
-                    console.table(resposta);
+                    // console.table(resposta);
                     // resposta.reverse();
                     plotar_grafico_linha(resposta, id_usuario);
                 });
@@ -147,7 +161,6 @@ function obter_dados_grafico_evolucao() {
 
 function plotar_grafico_linha(resposta, id_usuario) {
         console.log("Dados do gráfico de linha:", resposta);
-
         console.log('iniciando plotagem do gráfico de linha...');
 
         // Criando estrutura para plotar gráfico_linha - dados
@@ -155,11 +168,16 @@ function plotar_grafico_linha(resposta, id_usuario) {
             labels: [],
             datasets: [
             {
-                label: 'Evolução de Arremessos',
+                label: 'Aproveitamento do momento',
                 data: [],
-                fill: false,
-                borderColor: 'rgb(199, 52, 52)',
-                tension: 0.4
+                fill: true,
+                backgroundColor: 'rgba(255, 85, 0, 0.1)',
+                borderColor: '#FF5500',
+                borderWidth: 3,
+                tension: 0.3,
+                pointRadius: 2,
+                pointBackgroundColor: '#FFFFFF',
+                pointBorderColor: '#FF5500'
             }]
         };
 
@@ -174,11 +192,12 @@ for (let i = resposta.length - 1; i >= 0; i--) {
     if (resposta[i].resultado === "Acertou") {
         totalAcertos++;
     }
-
-    dados_linha.datasets[0].data.push(totalAcertos);
+    let aproveitamento = (totalAcertos / numeroTentativa) * 100;
+    dados_linha.datasets[0].data.push(aproveitamento.toFixed(0));
 
     numeroTentativa++;
 }
+console.log(numeroTentativa);
 
     const config_linha = {
     type: "line",
@@ -208,7 +227,7 @@ function plotar_grafico_donut(resposta, id_usuario) {
         datasets: [
         {
             data: [dashboard.total_acertos, dashboard.total_erros],
-            backgroundColor: ["#22c55e", "#ef4444"], 
+            backgroundColor: ["#12C612", "#bc0808"], 
             borderColor: "#161616",
             borderWidth: 3,
         },
