@@ -26,9 +26,6 @@
                 <li>
                     <a href="index.html">Inicial</a>
                 </li>
-                <li>
-                    <a href="simulador.html">Simulador</a>
-                </li>
                 <li>|</li>
                 <li class="agora">
                     <span href="#">Login</span>
@@ -48,7 +45,7 @@
             </div>
         </div>
         <div class="container">
-            <div class="card card-login">
+            <div class="card card-login-cadastro">
                 <h2>Game Winner</h2>
                 <div class="formulario">
                     <div class="campo">
@@ -62,11 +59,7 @@
                     <button class="botao" onclick="entrar()">Entrar</button>
                 </div>
 
-                <div id="div_aguardar" class="loading-div">
-                    <img src="./assets/circle-loading.gif" id="loading-gif">
-                </div>
-
-                <div id="div_erros_login"></div>
+                <div id="mensagem_erro2"></div>
             </div>
         </div>
     </div>
@@ -79,18 +72,21 @@
 
 
     function entrar() {
-        aguardar();
 
         var emailVar = email_input.value;
         var senhaVar = senha_input.value;
 
-        if (emailVar == "" || senhaVar == "") {
-            cardErro.style.display = "block"
-            mensagem_erro.innerHTML = "(Mensagem de erro para todos os campos em branco)";
-            finalizarAguardar();
-            return false;
-        }
-        else {
+        if (emailVar.trim() == "" || senhaVar.trim() == "") {
+    mensagem_erro2.innerHTML = "⚠️ Por favor, preencha e-mail e senha!";
+    return false;
+    }
+    let arroba = emailVar.indexOf("@");
+    let ponto_com = emailVar.lastIndexOf(".com");
+
+    if (arroba == -1 || ponto_com == -1 || ponto_com < arroba) {
+    mensagem_erro2.innerHTML = "⚠️ O formato do e-mail inserido é inválido.";
+    return false;
+    } else {
             setInterval(sumirMensagem, 5000)
         }
 
