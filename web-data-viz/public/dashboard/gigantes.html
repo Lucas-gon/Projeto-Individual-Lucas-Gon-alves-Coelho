@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Winner | Gigantes</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet"/>
+    
+    <link rel="stylesheet" href="./../css/dashboards.css">
+    <link rel="stylesheet" href="./../css/estilo.css" />
+    <link rel="stylesheet" href="./../css/gigantes.css" />
+
+    <script src="../js/sessao.js"></script>
+
+    <link rel="icon" href="../assets/icon/favicon2.ico">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <div class="header-left">
+            <h1 class="titulo">Game Winner</h1>
+
+            <div class="hello">
+                <h3>Olá, <span id="b_usuario">usuário</span>!</h3>
+            </div>
+
+            <div class="btn-nav-white">
+                <a href="./tentativas.html">
+                    <h3>Registrar Tentativas</h3>
+                </a>
+            </div>
+
+            <div class="btn-nav">
+                <a href="./gigantes.html">
+                    <h3>Gigantes</h3>
+                </a>
+            </div>
+
+            <div class="btn-nav-white">
+                <a href="./dashboard.html">
+                    <h3>Gráficos</h3>
+                </a>
+            </div>
+
+            <div class="btn-logout" onclick="limparSessao()">
+                <h3>Sair</h3>
+            </div>
+        </div>
+
+<div class="dash-right">
+        <div class="secao-grafico">
+    <div class="container-grafico">
+        <h2 class="titulo-secao">Dados dos Gigantes</h2>
+
+        <div class="conteudo-dashboard">
+        <div class="container-jogadores">
+            <h3>Selecione um jogador:</h3>
+            <div id="lista-botoes" class="lista-botoes"> </div>
+        </div>
+
+        <div class="dashboard-gigantes">
+            <!-- <div class="cabecalho-jogador"> -->
+            <div class="foto-jogador-container">
+                <img id="jogador-foto" src="" alt="Foto do Jogador" class="foto-atleta">
+            </div>
+
+            <div class="perfil-jogador">
+                <h3 id="jogador-nome">Carregando...</h3>
+                <div class="info-badges">
+                    <span class="badge">Posição: <strong id="jogador-posicao">-</strong></span><br>
+                    <span class="badge">Time Atual: <strong id="jogador-time">-</strong></span><br>
+                    <span class="badge">Altura: <strong id="jogador-altura">-</strong></span>
+                </div>
+                <div class="bloco-frase">
+                    <p id="jogador-frase_motivacional">-</p>
+                </div>
+            </div>
+        <!-- </div> -->
+        <div class="container-grafico-donut">
+            <h4 style="color: #FF5500">Game Winners</h4>
+            <div class="canvas-wrapper">
+                <canvas id="grafico-donut"></canvas>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+<script>
+    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
+
+    let lista_jogadores = [];
+    let grafico_jogadores = null;
+
+    function buscar_jogadores() {
+        fetch("/jogadores/buscar", { 
+                method: "GET", 
+                headers: { "Content-Type": "application/json" },
+    })
+        .then(function (response) {
+            if (response.ok) {
+                response.json()
+                .then(function (resposta) {
+                    console.log(`Quantidade de jogadores recebidos: ${JSON.stringify(resposta.length)}`);
+                    lista_jogadores = resposta;
+                    botao_jogador();
+                    mostrar_dados(0);
+                });
+            } else {
+                console.error('Nenhum jogador encontrado ou erro na API');
+            }
+        })
+        .catch(function (error) {
+            console.error(`Erro ao buscar jogadores: ${error.message}`);
+        });
+    }
+
+    function botao_jogador() {
+        const div_botoes = document.getElementById('lista-botoes');
+        div_botoes.innerHTML = ""; 
+
+        for (let i = 0; i < lista_jogadores.length; i++) {
+            const jogador_atual = lista_jogadores[i];
+
+            const novo_botao = document.createElement('button');
+            novo_botao.className = "botoes-jogadores";
+            novo_botao.innerText = jogador_atual.nome;
+            
+            novo_botao.setAttribute('onclick', 'mostrar_dados(' + i + ')');
+            
+            div_botoes.appendChild(novo_botao);
+        }
+    }
+
+    function mostrar_dados(posicao_jogador) {
+        const jogador = lista_jogadores[posicao_jogador];
+
+        document.getElementById('jogador-nome').innerText = jogador.nome;
+        document.getElementById('jogador-posicao').innerText = jogador.posicao;
+        document.getElementById('jogador-time').innerText = jogador.time_atual;
+        document.getElementById('jogador-altura').innerText = jogador.altura + "m";
+        document.getElementById('jogador-frase_motivacional').innerText = '"' + jogador.frase_motivacional + '"';
+
+        document.getElementById('jogador-foto').src = "../assets/imgs/fotos_jogadores/" + jogador.id_jogador + ".png";
+        document.getElementById('jogador-foto').alt = "Foto de " + jogador.nome;
+
+        plotar_grafico_donut(Number(jogador.game_winners_convertidos), Number(jogador.game_winners_perdidos));
+    }
+
+    function plotar_grafico_donut(convertidos, perdidos) {
+        const contexto = document.getElementById('grafico-donut').getContext('2d');
+        
+        if (grafico_jogadores !== null) {
+            grafico_jogadores.destroy();
+        }
+
+        grafico_jogadores = new Chart(contexto, {
+            type: 'doughnut',
+            data: {
+                labels: ['Convertidos', 'Perdidos'],
+                datasets: [{
+                    data: [convertidos, perdidos],
+                    backgroundColor: ['#FF5500', '#25262f'],
+                    borderColor: '#16171d',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '0%'
+            }
+        });
+    }
+
+    window.onload = buscar_jogadores;
+</script>
